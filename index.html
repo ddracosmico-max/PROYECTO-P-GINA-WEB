@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffe600">
+  <title>Umatronix | Catálogo</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header" id="inicio">
+    <div class="topbar">
+      <a class="brand" href="#inicio" aria-label="Umatronix, inicio">
+        <span class="brand-mark">U</span><span class="brand-name">umatronix</span>
+      </a>
+      <div class="header-actions">
+        <button class="button button-dark" id="openAdd" type="button"><span class="button-symbol" aria-hidden="true">＋</span><span>Agregar elemento</span></button>
+        <button class="button button-light" id="openList" type="button" aria-label="Abrir mi lista">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7Zm3 0V5a3 3 0 0 1 6 0v2M9 10v6m6-6v6"/></svg>
+          <span class="list-label">Mi lista</span><span class="count-pill" id="itemCount">0</span>
+        </button>
+      </div>
+    </div>
+    <div class="category-shell">
+      <button class="scroll-arrow" id="scrollLeft" type="button" aria-label="Ver categorías anteriores" title="Ver categorías anteriores">‹</button>
+      <nav class="category-bar" aria-label="Categorías del catálogo" id="categoryBar">
+        <button class="category active" data-category="Todas" type="button">Todas</button>
+        <button class="category" data-category="Celulares" type="button">Celulares</button>
+        <button class="category" data-category="Computación" type="button">Computación</button>
+        <button class="category" data-category="Audio y TV" type="button">Audio y TV</button>
+        <button class="category" data-category="Videojuegos" type="button">Videojuegos</button>
+        <button class="category" data-category="Electrodomésticos" type="button">Electrodomésticos</button>
+        <button class="category" data-category="Hogar" type="button">Hogar</button>
+        <button class="category" data-category="Cocina" type="button">Cocina</button>
+        <button class="category" data-category="Muebles" type="button">Muebles</button>
+        <button class="category" data-category="Moda Mujer" type="button">Moda Mujer</button>
+        <button class="category" data-category="Moda Hombre" type="button">Moda Hombre</button>
+        <button class="category" data-category="Calzado" type="button">Calzado</button>
+        <button class="category" data-category="Accesorios" type="button">Accesorios</button>
+        <button class="category" data-category="Deportes" type="button">Deportes</button>
+        <button class="category" data-category="Belleza" type="button">Belleza</button>
+        <button class="category" data-category="Salud y Bienestar" type="button">Salud y Bienestar</button>
+        <button class="category" data-category="Juguetes" type="button">Juguetes</button>
+        <button class="category" data-category="Bebés" type="button">Bebés</button>
+        <button class="category" data-category="Mascotas" type="button">Mascotas</button>
+        <button class="category" data-category="Libros" type="button">Libros</button>
+        <button class="category" data-category="Papelería" type="button">Papelería</button>
+        <button class="category" data-category="Herramientas" type="button">Herramientas</button>
+        <button class="category" data-category="Automotriz" type="button">Automotriz</button>
+        <button class="category" data-category="Jardín" type="button">Jardín</button>
+        <button class="category" data-category="Supermercado" type="button">Supermercado</button>
+        <button class="category" data-category="Instrumentos" type="button">Instrumentos</button>
+      </nav>
+      <button class="scroll-arrow" id="scrollRight" type="button" aria-label="Ver más categorías" title="Ver más categorías">›</button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <section class="catalog-heading" aria-labelledby="pageTitle">
+      <div>
+        <p class="eyebrow">TU TIENDA · UMATRONIX</p>
+        <h1 id="pageTitle">Catálogo</h1>
+        <p class="heading-caption" id="activeCaption">Explora las categorías de la tienda.</p>
+      </div>
+      <div class="heading-tools">
+        <span class="item-summary" id="summary">0 elementos</span>
+        <button class="button button-outline" id="clearFilter" type="button" hidden>Ver todas</button>
+      </div>
+    </section>
+
+    <section class="catalog-area" aria-label="Elementos del catálogo">
+      <div class="items-grid" id="itemsGrid" aria-live="polite"></div>
+      <div class="empty-state" id="emptyState">
+        <span class="empty-accent" aria-hidden="true"></span>
+        <h2 id="emptyTitle">Tu catálogo está vacío</h2>
+        <p id="emptyText">Cuando quieras, agrega tu primer elemento y asígnalo a una categoría.</p>
+        <button class="button button-outline" id="emptyAdd" type="button"><span aria-hidden="true">＋</span> Agregar elemento</button>
+      </div>
+    </section>
+    <footer class="page-footer"><span>UMATRONIX</span><span>Catálogo de la tienda</span><button id="backToTop" type="button">Volver arriba ↑</button></footer>
+  </main>
+
+  <dialog id="addDialog" class="dialog">
+    <form id="addForm">
+      <div class="dialog-heading"><div><p class="eyebrow">GESTIONAR CATÁLOGO</p><h2>Agregar elemento</h2></div><button class="close-button" type="button" id="closeAdd" aria-label="Cerrar">×</button></div>
+      <label for="elementName">Nombre del elemento</label>
+      <input id="elementName" name="elementName" maxlength="80" required autocomplete="off" placeholder="Escribe el nombre">
+      <label for="elementCategory">Categoría</label>
+      <select id="elementCategory" name="elementCategory" required></select>
+      <p class="form-note">Solo se guardará el nombre y la categoría. No se solicitan imágenes ni precios.</p>
+      <div class="dialog-actions"><button type="button" class="button button-muted" id="cancelAdd">Cancelar</button><button type="submit" class="button button-dark">Guardar elemento</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="listDialog" class="dialog list-dialog">
+    <div class="dialog-heading"><div><p class="eyebrow">UMATRONIX</p><h2>Mi lista</h2><p class="dialog-subtitle">Elementos que has marcado para tener a mano.</p></div><button class="close-button" id="closeList" type="button" aria-label="Cerrar">×</button></div>
+    <div id="listContents" class="list-contents"></div>
+    <div class="dialog-actions list-footer"><button type="button" class="button button-muted" id="clearList">Vaciar lista</button><button type="button" class="button button-dark" id="doneList">Listo</button></div>
+  </dialog>
+  <dialog id="confirmDialog" class="dialog confirm-dialog">
+    <div class="dialog-heading"><div><p class="eyebrow">CONFIRMAR ACCIÓN</p><h2>¿Eliminar elemento?</h2><p class="dialog-subtitle" id="confirmText">Esta acción no se puede deshacer.</p></div><button class="close-button" id="cancelDeleteX" type="button" aria-label="Cerrar">×</button></div>
+    <div class="dialog-actions"><button class="button button-muted" id="cancelDelete" type="button">Cancelar</button><button class="button button-danger" id="confirmDelete" type="button">Eliminar</button></div>
+  </dialog>
+</body>
+</html>
