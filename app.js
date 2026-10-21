@@ -10,9 +10,18 @@
   const STORAGE_KEY = 'umatronix.catalog.v2';
   const AUTH_KEY = 'umatronix.auth.v1';
   const USER_PROFILE_KEY = 'umatronix.user.profile.v1';
+  const MAX_IMAGE_SIZE_BYTES = 500 * 1024;
   const safe = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 
   function normalizeEmail(email){ return String(email || '').trim().toLowerCase(); }
+  function getLoggedUser(){
+    try {
+      const raw = localStorage.getItem(AUTH_KEY) || '';
+      const profile = JSON.parse(localStorage.getItem(USER_PROFILE_KEY) || 'null');
+      return normalizeEmail(raw || (profile && profile.email) || '');
+    }
+    catch { return ''; }
+  }
   function getCurrentCatalogKey(){
     const email = normalizeEmail(getLoggedUser());
     return email ? `umatronix.catalog.${email.replace(/[^a-z0-9]/g, '_')}` : STORAGE_KEY;
@@ -93,10 +102,17 @@
       }
       .auth-dialog {
         width: min(430px, calc(100vw - 24px));
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border: none;
         border-radius: 18px;
         padding: 0;
         box-shadow: 0 20px 45px rgba(20, 36, 62, 0.18);
+      }
+      .auth-dialog[open] {
+        display: flex;
       }
       .auth-dialog::backdrop {
         background: rgba(16, 25, 38, 0.45);
@@ -134,15 +150,6 @@
       }
     `;
     document.head.appendChild(style);
-  }
-
-  function getLoggedUser(){
-    try {
-      const raw = localStorage.getItem(AUTH_KEY) || '';
-      const profile = JSON.parse(localStorage.getItem(USER_PROFILE_KEY) || 'null');
-      return normalizeEmail(raw || (profile && profile.email) || '');
-    }
-    catch { return ''; }
   }
 
   function setLoggedUser(email){
@@ -270,7 +277,10 @@
       const key = getCurrentCatalogKey();
       localStorage.setItem(key, JSON.stringify(items));
       if (!getLoggedUser()) localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch { /* La página sigue funcionando si el navegador bloquea el almacenamiento. */ }
+    } catch (error) {
+      console.error('No se pudo guardar en localStorage:', error);
+      window.alert('La imagen es demasiado grande o el almacenamiento está lleno. Usa una imagen más pequeña o elimina elementos guardados.');
+    }
   }
   categories.forEach(name => { const option = document.createElement('option'); option.value = name; option.textContent = name; if (select) select.appendChild(option); });
 
@@ -292,6 +302,10 @@
     return new Promise((resolve, reject) => {
       if (!(file instanceof File)) {
         reject(new Error('No se seleccionó un archivo válido.'));
+        return;
+      }
+      if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        reject(new Error('La imagen supera el tamaño permitido (máximo 500 KB).'));
         return;
       }
       const reader = new FileReader();
@@ -369,6 +383,13 @@
     const name = $('elementName').value.trim();
     if(!name) { $('elementName').focus(); return; }
     const editingId = event.currentTarget.dataset.editing;
+    const nextItem = {
+      id: editingId || makeId(),
+      name,
+      category: select.value,
+      inList: false,
+      image: pendingProductImage || ''
+    };
     if(editingId){
       const item = items.find(x => x.id === editingId);
       if(item){
@@ -377,10 +398,25 @@
         item.image = pendingProductImage || item.image || '';
       }
     } else {
-      items.push({id:makeId(),name,category:select.value,inList:false,image:pendingProductImage || ''});
+      items = [...items, nextItem];
     }
     pendingProductImage = '';
-    persist(); closeAdd(); render();
+    try {
+      const key = getCurrentCatalogKey();
+      localStorage.setItem(key, JSON.stringify(items));
+      if (!getLoggedUser()) localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch (error) {
+      console.error('No se pudo guardar en localStorage:', error);
+      if (editingId) {
+        const item = items.find(x => x.id === editingId);
+        if (item) item.image = '';
+      } else {
+        items = items.filter(x => x.id !== nextItem.id);
+      }
+      window.alert('No se pudo guardar el producto. La imagen es demasiado grande o el almacenamiento está lleno. Usa una imagen más pequeña.');
+      return;
+    }
+    closeAdd(); render();
   });
 
   $('categoryBar')?.addEventListener('click', event => {
